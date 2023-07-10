@@ -1,4 +1,4 @@
-#Malware Classification method with Self-supervised learning
+# Malware Classification method with Self-supervised learning
 
 this is the repository of our paper **"MalSSL-Malware detection system with self-supervised learning and Image Representation"**
 We developed a malware detection system with contrastive learning and Convolutional Neural Network Resnet18 architecture.  
