@@ -29,7 +29,7 @@ collate_fn = lightly.data.SimCLRCollateFunction(
     rr_prob=0.5
 )
 
-# We create a torchvision transformation for embedding the dataset after
+# torchvision transformation for embedding the dataset after training
 test_transforms = torchvision.transforms.Compose([
     torchvision.transforms.Resize((input_size, input_size)),
     torchvision.transforms.ToTensor(),
@@ -115,7 +115,7 @@ trainer.fit(model, dataloader_train_simclr)
 #to save a model
 pretrained_resnet_backbone = model.backbone
 
-# you can also store the backbone and use it in another code
+# to store the backbone and use it in another code
 state_dict = {
     'resnet18_parameters': pretrained_resnet_backbone.state_dict()
 }
