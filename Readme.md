@@ -17,4 +17,5 @@ https://vision.ece.ucsb.edu/research/signal-processing-malware-analysis
 Maldeb Dataset is collected by Debi Amalia Septiyani and Halimul Hakim Khairul
 D. A. Septiyani, “Generating Grayscale and RGB Images dataset for windows PE malware using Gist Features extaction method,” Institut Teknologi Bandung, 2022.
 
-GAN-generated samples are created with DC-GAN algorithm from Maldeb dataset
+GAN-generated samples are created with DCGAN algorithm from Maldeb dataset
+DCGAN - Radford, A., Metz, L., & Chintala, S. (2015). Unsupervised representation learning with deep convolutional generative adversarial networks. arXiv preprint arXiv:1511.06434.
