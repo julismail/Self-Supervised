@@ -1,1 +1,0 @@
-this is the malicious samples collected by Debi Amalia Septiyani and Halimul Hakim Khairul. They collected from severeal sources, validated and converted the sample into image following the recommendations by Nataraj
