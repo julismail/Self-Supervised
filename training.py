@@ -10,11 +10,12 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import normalize
 from PIL import Image
 import numpy as np
+from lightly.data import LightlyDataset
 
 num_workers = 8
-batch_size = 256
+batch_size = 512
 seed = 1
-max_epochs = 100
+max_epochs = 300
 input_size = 128
 num_ftrs = 32
 
@@ -23,36 +24,31 @@ pl.seed_everything(seed)
 path_to_data = '/home/ismail/datasets/debi/Gray'
 
 #data augmentation
-collate_fn = lightly.data.SimCLRCollateFunction(
-    input_size=input_size,
-    vf_prob=0.5,
-    rr_prob=0.5
-)
+transform = SimCLRTransform(input_size,vf_prob=0.5,rr_prob=0.5)
 
 # torchvision transformation for embedding the dataset after training
 test_transforms = torchvision.transforms.Compose([
     torchvision.transforms.Resize((input_size, input_size)),
     torchvision.transforms.ToTensor(),
     torchvision.transforms.Normalize(
-        mean=lightly.data.collate.imagenet_normalize['mean'],
-        std=lightly.data.collate.imagenet_normalize['std'],
-    )
+        mean=utils.IMAGENET_NORMALIZE['mean'],
+        std=utils.IMAGENET_NORMALIZE['std'],
+    ),
 ])
 
-dataset_train_simclr = lightly.data.LightlyDataset(
-    input_dir=path_to_data
+dataset_train_simclr = LightlyDataset(
+    input_dir=path_to_data, transform=transform
 )
 
-dataset_test = lightly.data.LightlyDataset(
+dataset_test = LightlyDataset(
     input_dir=path_to_data,
-    transform=test_transforms
+    transform=transforms
 )
 
 dataloader_train_simclr = torch.utils.data.DataLoader(
     dataset_train_simclr,
     batch_size=batch_size,
     shuffle=True,
-    collate_fn=collate_fn,
     drop_last=True,
     num_workers=num_workers
 )
@@ -64,7 +60,8 @@ dataloader_test = torch.utils.data.DataLoader(
     drop_last=False,
     num_workers=num_workers
 )
-from lightly.models.modules.heads import SimCLRProjectionHead
+
+from lightly.models.modules.heads import ProjectionHead
 from lightly.loss import NTXentLoss
 
 
@@ -77,7 +74,7 @@ class SimCLRModel(pl.LightningModule):
         self.backbone = nn.Sequential(*list(resnet.children())[:-1])
 
         hidden_dim = resnet.fc.in_features
-        self.projection_head = SimCLRProjectionHead(hidden_dim, hidden_dim, 128)
+        self.projection_head = ProjectionHead(hidden_dim, hidden_dim, 128)
 
         self.criterion = NTXentLoss()
 
@@ -102,10 +99,11 @@ class SimCLRModel(pl.LightningModule):
             optim, max_epochs
         )
         return [optim], [scheduler]
+        
 from pytorch_lightning.callbacks import TQDMProgressBar
 gpus = 1 if torch.cuda.is_available() else 0
 
-model = SimCLRModel()
+model = MalSSLModel()
 trainer = pl.Trainer(
     max_epochs=max_epochs, accelerator='gpu', devices=1, 
                      callbacks=[TQDMProgressBar(refresh_rate=100)])
@@ -119,5 +117,5 @@ pretrained_resnet_backbone = model.backbone
 state_dict = {
     'resnet18_parameters': pretrained_resnet_backbone.state_dict()
 }
-torch.save(state_dict, 'modelsimclr256100coDebi.pth')
+torch.save(state_dict, 'model1.pth')
 
