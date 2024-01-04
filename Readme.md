@@ -12,5 +12,5 @@ We tested the system on two Downstream tasks:
 Malimg Dataset is malware image dataset from Nataraj Paper:
 https://vision.ece.ucsb.edu/research/signal-processing-malware-analysis
 
-Debi Dataset is collected by Debi Amalia Septiyani and Halimul Hakim Khairul
+Maldeb Dataset is collected by Debi Amalia Septiyani and Halimul Hakim Khairul
 D. A. Septiyani, “Generating Grayscale and RGB Images dataset for windows PE malware using Gist Features extaction method,” Institut Teknologi Bandung, 2022.
