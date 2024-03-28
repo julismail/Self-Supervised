@@ -9,7 +9,7 @@ We tested the system on two Downstream tasks:
 (1) Malware family classification with Malimg dataset, and 
 (2) Malware benign classification with Debi dataset. 
 
-The Dataset were collected from several malware repositories, including TekDefense, TheZoo, The Malware-Repo, Malware Database amd Malware Bazar. The benign samples were collected from Microsoft 10 and 11 system apps and several open source software repository including CNET, Sourceforge, FileForum, PortableFreeware.
+The Maldeb Dataset were collected from several malware repositories, including TekDefense, TheZoo, The Malware-Repo, Malware Database amd Malware Bazar. The benign samples were collected from Microsoft 10 and 11 system apps and several open source software repository including CNET, Sourceforge, FileForum, PortableFreeware.
 Malimg Dataset is malware image dataset from Nataraj Paper:
 https://vision.ece.ucsb.edu/research/signal-processing-malware-analysis
 
