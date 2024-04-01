@@ -1,0 +1,159 @@
+#testing code for cross-validation
+import os
+from torchvision import datasets, transforms
+from torch.utils.data import Dataset
+from PIL import Image
+
+class CustomDataset(Dataset):
+    def __init__(self, root_dir, image_paths, transform=None):
+        self.root_dir = root_dir
+        self.image_paths = image_paths
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        img_name = os.path.join(self.root_dir, self.image_paths[idx])
+        image = Image.open(img_name)
+        if self.transform:
+            image = self.transform(image)
+        return image
+
+# Assuming dataset_paths contains the paths to your images
+dataset_paths = '/home/Documents/datasets/maldeb/'
+
+# Define the number of folds for cross-validation
+num_folds = 5
+kf = KFold(n_splits=num_folds, shuffle=True, random_state=42)
+
+# Create lists to store dataloaders for each fold
+train_moco_dataloaders = []
+train_classifier_dataloaders = []
+test_dataloaders = []
+
+# Split the dataset into folds for cross-validation
+for train_index, test_index in kf.split(dataset_paths):
+    train_moco_paths = [dataset_paths[i] for i in train_index]
+    test_paths = [dataset_paths[i] for i in test_index]
+
+    # Define CustomDataset for training the contrastive learning model
+    dataset_train_moco = CustomDataset(
+        root_dir=path_to_data,
+        image_paths=train_moco_paths,
+        transform=train_classifier_transforms
+    )
+
+    # Define CustomDataset for training the classifier
+    dataset_train_classifier = CustomDataset(
+        root_dir=path_to_data,
+        image_paths=train_moco_paths,  # Use the same paths for training classifier as contrastive learning
+        transform=test_transforms
+    )
+
+    # Define CustomDataset for testing
+    dataset_test = CustomDataset(
+        root_dir=path_to_data,
+        image_paths=test_paths,
+        transform=test_transforms
+    )
+
+    # Create dataloaders for each fold
+    dataloader_train_moco = torch.utils.data.DataLoader(
+        dataset_train_moco,
+        batch_size=batch_size,
+        shuffle=True,
+        drop_last=True,
+        num_workers=num_workers
+    )
+
+    dataloader_train_classifier = torch.utils.data.DataLoader(
+        dataset_train_classifier,
+        batch_size=batch_size,
+        shuffle=True,
+        drop_last=True,
+        num_workers=num_workers
+    )
+
+    dataloader_test = torch.utils.data.DataLoader(
+        dataset_test,
+        batch_size=batch_size,
+        shuffle=False,
+        drop_last=False,
+        num_workers=num_workers
+    )
+
+    # Append the dataloaders to the respective lists
+    train_moco_dataloaders.append(dataloader_train_moco)
+    train_classifier_dataloaders.append(dataloader_train_classifier)
+    test_dataloaders.append(dataloader_test)
+
+#to calculate FPR metrics
+class AccuracyCallback(pl.Callback):
+    def __init__(self, test_dataloader):
+        super().__init__()
+        self.epoch_accuracies = []
+        self.epoch_fprs = []
+        self.dataloader_test = dataloader_test
+
+    def on_epoch_end(self, trainer, pl_module):
+        # Evaluate the model on the test dataloader
+        result = trainer.test(model=pl_module, dataloaders=self.dataloader_test, verbose=False)
+        accuracy = result[0]['test_acc']
+        # Calculate FPR
+        fpr = calculate_fpr(pl_module, self.dataloader_test)
+        self.epoch_accuracies.append(accuracy)
+        self.epoch_fprs.append(fpr)
+
+    def on_train_epoch_end(self, trainer, pl_module):
+        for epoch, accuracy in enumerate(zip(self.epoch_accuracies, self.epoch_fprs), start=1):
+            print(f'Test Accuracy at Epoch {epoch}: {accuracy:.4f}')
+            print(f'False Positive Rate at Epoch {epoch}: {fpr:.4f}')
+        if not self.epoch_accuracies:
+            print(f'No accuracy data available for Epoch {trainer.current_epoch + 1}')
+
+def calculate_fpr(model, dataloader):
+    model.eval()
+    all_preds = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for batch in dataloader:
+            inputs, labels = batch
+            inputs = inputs.to(model.device)
+            labels = labels.to(model.device)
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+    
+    cm = confusion_matrix(all_labels, all_preds)
+    fp = cm.sum(axis=0) - np.diag(cm)
+    tn = cm.sum() - (cm.sum(axis=0) + cm.sum(axis=1) - np.diag(cm))
+    fpr = fp / (fp + tn)
+    fpr = np.mean(fpr)
+    return fpr
+    
+dataloaders = {
+    'train': dataloader_train_classifier,
+    'test': dataloader_test
+}
+
+for fold_idx, (train_dataloader_fold, test_dataloader_fold) in enumerate(dataloaders_list):
+    accuracy_callback = AccuracyCallback(test_dataloader_fold)
+    model = SimCLRModel()
+    model.eval()
+    classifier = Classifier(model.backbone)
+
+    # Pass the accuracy_callback to the callbacks list
+    trainer = pl.Trainer(max_epochs=max_epochs, devices=1, accelerator='gpu',
+                     callbacks=[TQDMProgressBar(refresh_rate=100), accuracy_callback],
+                     log_every_n_steps=None)
+
+    # Make sure the dataloaders have data
+    if len(train_dataloader_fold) > 0 and len(test_dataloader_fold) > 0:
+        trainer.fit(classifier, train_dataloader_fold, test_dataloader_fold)
+    else:
+        print("No training or testing data available for fold", fold_idx + 1)
+
+    trainer.fit(classifier,train_dataloader_fold, test_dataloader_fold)
