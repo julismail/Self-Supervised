@@ -36,8 +36,8 @@ from lightly.models.utils import update_momentum
 from lightly.models.utils import batch_shuffle
 from lightly.models.utils import batch_unshuffle
 from pytorch_lightning.callbacks import TQDMProgressBar
-path_to_train = '/home/ismail/datasets/debisplit/training'
-path_to_test = '/home/ismail/datasets/debisplit/test'
+path_to_train = '/home/datasets/maldebi/training'
+path_to_test = '/home/ismail/datasets/maldeb/test'
 
 # data Augmentations to train on cifar-10
 train_classifier_transforms = torchvision.transforms.Compose([
