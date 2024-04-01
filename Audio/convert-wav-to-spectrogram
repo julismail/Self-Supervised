@@ -1,0 +1,50 @@
+#untuk convert audio ke spectrogramm
+import os
+import torchaudio
+import torch
+import torchvision.transforms as transforms
+
+def wav_to_spectrogram(input_folder, output_folder, n_fft_factor=2, n_mels=32):
+    # Create output folder if it doesn't exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Parameters for spectrogram generation
+    sample_rate = 44100
+    hop_length = 400
+
+    #define Melspectro 
+    mel_spectrogram = torchaudio.transforms.MelSpectrogram(
+        sample_rate=sample_rate,
+        hop_length=hop_length,
+        n_mels=n_mels,
+        n_fft=int(sample_rate / hop_length * n_fft_factor),
+        f_max=sample_rate/2,
+    )
+    #define transform
+    transform = transforms.Compose([
+        torchaudio.transforms.AmplitudeToDB(),
+        transforms.ToPILImage(mode='L')
+    ])
+    
+    # Iterate through each WAV file in the input folder
+    for filename in os.listdir(input_folder):
+        if filename.endswith(".wav"):
+            # Load the audio file
+            file_path = os.path.join(input_folder, filename)
+            waveform, _ = torchaudio.load(file_path)
+            spectrogram = mel_spectrogram(waveform)
+            # Convert to decibel scale
+            #convert to grayscale image
+            image = transform(spectrogram)
+            
+            # Plot and save the spectrogram as grayscale PNG
+            image.save(os.path.join(output_folder, filename.split('.')[0] + '.png'))
+
+input_folder = "/home/Documents/dataset/debiwav/benign/"
+output_folder = "/home/Documents/dataset/debispectro/benign/"
+n_fft_factor = 2
+n_mels=32
+#n_freqs = 128
+
+wav_to_spectrogram(input_folder, output_folder, n_fft_factor, n_mels)
