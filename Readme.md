@@ -6,7 +6,7 @@ We developed a malware detection system with contrastive learning and Convolutio
 We trained the model with unlabeled Imagenette dataset as a pretext task. 
 Then, we retrained the model to recognize malware image representation in Downstream Task.  
 
-###We tested the system on two Downstream tasks: 
+### We tested the system on two Downstream tasks: 
 *(1) Malware family classification with Malimg dataset, and 
 *(2) Malware benign classification with Debi dataset. 
 
