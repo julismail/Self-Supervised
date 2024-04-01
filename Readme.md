@@ -17,4 +17,6 @@ https://vision.ece.ucsb.edu/research/signal-processing-malware-analysis
 
 build with pytorch
 https://pytorch.org/
+and lightly
+https://docs.lightly.ai/self-supervised-learning/index.html
 
