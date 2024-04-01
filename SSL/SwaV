@@ -1,0 +1,131 @@
+import os
+import numpy as np
+import pytorch_lightning as pl
+import torch
+import torchvision
+from torch import nn
+
+from lightly.loss import SwaVLoss
+from lightly.loss.memory_bank import MemoryBankModule
+from lightly.models.modules import SwaVProjectionHead, SwaVPrototypes
+from lightly.transforms.swav_transform import SwaVTransform
+from lightly.transforms import utils
+from lightly.data import LightlyDataset
+
+#num_workers = 8
+#batch_size = 256
+seed = 1
+#max_epochs = 300
+input_size = 128
+#num_ftrs = 32
+
+pl.seed_everything(seed)
+
+transform = SwaVTransform(
+    #input_size=32,
+    #gaussian_blur=0.0,
+    crop_sizes = (224, 96), 
+    crop_counts= (2, 6),
+)
+train_classifier_transforms = torchvision.transforms.Compose(
+    [
+        #torchvision.transforms.RandomCrop(32, padding=4),
+        torchvision.transforms.RandomCrop(32, padding=4),
+        torchvision.transforms.RandomHorizontalFlip(),
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize(
+            mean=utils.IMAGENET_NORMALIZE["mean"],
+            std=utils.IMAGENET_NORMALIZE["std"],
+        ),
+    ]
+)
+
+class SwaV(pl.LightningModule):
+    def __init__(self):
+        super().__init__()
+        resnet = torchvision.models.resnet18()
+        self.backbone = nn.Sequential(*list(resnet.children())[:-1])
+        self.projection_head = SwaVProjectionHead(512, 512, 128)
+        self.prototypes = SwaVPrototypes(128, 512, 1)
+        self.start_queue_at_epoch = 2
+        self.queues = nn.ModuleList([MemoryBankModule(size=3840) for _ in range(2)])
+        self.criterion = SwaVLoss()
+
+    def training_step(self, batch, batch_idx):
+        views = batch[0]
+        high_resolution, low_resolution = views[:2], views[2:]
+        self.prototypes.normalize()
+
+        high_resolution_features = [self._subforward(x) for x in high_resolution]
+        low_resolution_features = [self._subforward(x) for x in low_resolution]
+
+        high_resolution_prototypes = [
+            self.prototypes(x, self.current_epoch) for x in high_resolution_features
+        ]
+        low_resolution_prototypes = [
+            self.prototypes(x, self.current_epoch) for x in low_resolution_features
+        ]
+        queue_prototypes = self._get_queue_prototypes(high_resolution_features)
+        loss = self.criterion(
+            high_resolution_prototypes, low_resolution_prototypes, queue_prototypes
+        )
+        return loss
+
+    def configure_optimizers(self):
+        optim = torch.optim.Adam(self.parameters(), lr=0.001)
+        return optim
+
+    def _subforward(self, input):
+        features = self.backbone(input).flatten(start_dim=1)
+        features = self.projection_head(features)
+        features = nn.functional.normalize(features, dim=1, p=2)
+        return features
+
+    @torch.no_grad()
+    def _get_queue_prototypes(self, high_resolution_features):
+        if len(high_resolution_features) != len(self.queues):
+            raise ValueError(
+                f"The number of queues ({len(self.queues)}) should be equal to the number of high "
+                f"resolution inputs ({len(high_resolution_features)}). Set `n_queues` accordingly."
+            )
+
+        # Get the queue features
+        queue_features = []
+        for i in range(len(self.queues)):
+            _, features = self.queues[i](high_resolution_features[i], update=True)
+            # Queue features are in (num_ftrs X queue_length) shape, while the high res
+            # features are in (batch_size X num_ftrs). Swap the axes for interoperability.
+            features = torch.permute(features, (1, 0))
+            queue_features.append(features)
+
+        if (
+            self.start_queue_at_epoch > 0
+            and self.current_epoch < self.start_queue_at_epoch
+        ):
+            return None
+
+        # Assign prototypes
+        queue_prototypes = [
+            self.prototypes(x, self.current_epoch) for x in queue_features
+        ]
+        return queue_prototypes
+
+
+model = SwaV()
+
+dataset = LightlyDataset("/home/Documents/dataset/malimg",
+                        transform=transform,
+)
+
+dataloader = torch.utils.data.DataLoader(
+    dataset,
+    batch_size=128,
+    shuffle=True,
+    drop_last=True,
+    num_workers=8,
+    
+)
+accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+
+trainer = pl.Trainer(max_epochs=100, devices=1, accelerator=accelerator)
+trainer.fit(model=model, train_dataloaders=dataloader)
