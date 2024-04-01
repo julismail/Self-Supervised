@@ -141,7 +141,7 @@ dataloaders = {
 
 for fold_idx, (train_dataloader_fold, test_dataloader_fold) in enumerate(dataloaders_list):
     accuracy_callback = AccuracyCallback(test_dataloader_fold)
-    model = SimCLRModel()
+    model = MalSSLModel()
     model.eval()
     classifier = Classifier(model.backbone)
 
