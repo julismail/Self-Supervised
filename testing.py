@@ -26,7 +26,7 @@ pl.seed_everything(seed)
 # to create exactly the same backbone in order to load the weights
 backbone_new = nn.Sequential(*list(resnet18_new.children())[:-1])
 
-ckpt = torch.load('modelsimclr256100co.pth')
+ckpt = torch.load('model1.pth')
 backbone_new.load_state_dict(ckpt['resnet18_parameters'])
 
 #testing model, based on Moco
@@ -37,7 +37,7 @@ from lightly.models.utils import batch_shuffle
 from lightly.models.utils import batch_unshuffle
 from pytorch_lightning.callbacks import TQDMProgressBar
 path_to_train = '/home/datasets/maldebi/training'
-path_to_test = '/home/ismail/datasets/maldeb/test'
+path_to_test = '/home/datasets/maldeb/test'
 
 # data Augmentations to train on cifar-10
 train_classifier_transforms = torchvision.transforms.Compose([
