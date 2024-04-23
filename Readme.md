@@ -20,3 +20,5 @@ https://pytorch.org/
 and lightly
 https://docs.lightly.ai/self-supervised-learning/index.html
 
+DOI: 10.1109/ACCESS.2024.3392251
+
