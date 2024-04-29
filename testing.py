@@ -39,7 +39,7 @@ from pytorch_lightning.callbacks import TQDMProgressBar
 path_to_train = '/home/datasets/maldebi/training'
 path_to_test = '/home/datasets/maldeb/test'
 
-# data Augmentations to train on cifar-10
+# data Augmentations 
 train_classifier_transforms = torchvision.transforms.Compose([
     torchvision.transforms.Resize((input_size, input_size)),
     torchvision.transforms.ToTensor(),
@@ -59,7 +59,7 @@ test_transforms = torchvision.transforms.Compose([
     )
 ])
 
-#use the moco augmentations for training moco
+#use the moco augmentations
 dataset_train_moco = lightly.data.LightlyDataset(
     input_dir=path_to_train
 )
@@ -119,8 +119,6 @@ class Classifier(pl.LightningModule):
     def training_epoch_end(self, outputs):
         self.custom_histogram_weights()
 
-    # We provide a helper method to log weights in tensorboard
-    # which is useful for debugging.
     def custom_histogram_weights(self):
         for name, params in self.named_parameters():
             self.logger.experiment.add_histogram(
