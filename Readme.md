@@ -19,7 +19,7 @@ link to our paper: http://doi.org/10.1109/ACCESS.2024.3392251
 **Malimg Dataset** is malware image dataset from Nataraj Paper:
 https://vision.ece.ucsb.edu/research/signal-processing-malware-analysis
 
-# build with 
+# Build with 
 pytorch
 https://pytorch.org/
 and lightly
