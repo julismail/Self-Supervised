@@ -30,4 +30,6 @@ Folder Maldeb Dataset contains the collected malware-benign dataset
 Folder SSL contains benchmark SSL models
 Folder Audio contains code for pre-process malware for audio classification
 
+**Prerequisites** Pytorch https://pytorch.org , Lightly https://docs.lightly.ai/self-supervised-learning/getting_started/install.html
+
 
