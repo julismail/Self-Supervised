@@ -1,4 +1,4 @@
-#untuk convert audio ke spectrogramm
+#to convert audio to spectrogramm
 import os
 import torchaudio
 import torch
