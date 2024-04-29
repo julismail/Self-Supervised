@@ -26,12 +26,12 @@ and lightly
 https://docs.lightly.ai/self-supervised-learning/index.html
 
 # Usage
-file training.py for training the models
-file testing.py for testing the models
-file cross-validation for cross-validation testing with k=5
-Folder Maldeb Dataset contains the collected malware-benign dataset
-Folder SSL contains benchmark SSL models
-Folder Audio contains code for pre-process malware for audio classification
+1. File training.py for training the models
+2. File testing.py for testing the models
+3. File cross-validation for cross-validation testing with k=5
+4. Folder Maldeb Dataset contains the collected malware-benign dataset
+5. Folder SSL contains benchmark SSL models
+6. Folder Audio contains code for pre-process malware for audio classification
 
 
 
