@@ -35,5 +35,14 @@ https://docs.lightly.ai/self-supervised-learning/index.html
 5. Folder SSL contains benchmark SSL models
 6. Folder Audio contains code for pre-process malware for audio classification
 
+## Contributors
+* Hendrawan
+* Budi Rahardjo
+* Yasuo Musashi
+* Tutun Juhana
+* Debi Amalia Septiyani
+* Halimul Hakim Khairul
+* Dani Agung Prastiyo
+
 ## Contact
-Setia Juli Irzal Ismail (https://twitter.com/Jul_Ismail)
+https://twitter.com/Jul_Ismail
