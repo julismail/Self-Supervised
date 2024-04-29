@@ -21,13 +21,13 @@ The samples were validated by scanning them using Virustotal Malware scanning se
 **Malimg Dataset** is malware image dataset from Nataraj Paper:
 https://vision.ece.ucsb.edu/research/signal-processing-malware-analysis
 
-# Build with 
+## Build with 
 * pytorch
 https://pytorch.org/
 * lightly
 https://docs.lightly.ai/self-supervised-learning/index.html
 
-# Usage
+## Usage
 1. File training.py for training the models
 2. File testing.py for testing the models
 3. File cross-validation for cross-validation testing with k=5
@@ -35,5 +35,5 @@ https://docs.lightly.ai/self-supervised-learning/index.html
 5. Folder SSL contains benchmark SSL models
 6. Folder Audio contains code for pre-process malware for audio classification
 
-
-
+## Contact
+Setia Juli Irzal Ismail (https://twitter.com/Jul_Ismail)
