@@ -103,7 +103,7 @@ class SimCLRModel(pl.LightningModule):
 from pytorch_lightning.callbacks import TQDMProgressBar
 gpus = 1 if torch.cuda.is_available() else 0
 
-model = MalSSLModel()
+model = SimCLRModel()
 trainer = pl.Trainer(
     max_epochs=max_epochs, accelerator='gpu', devices=1, 
                      callbacks=[TQDMProgressBar(refresh_rate=100)])
